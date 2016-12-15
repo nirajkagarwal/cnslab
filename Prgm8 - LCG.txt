@@ -1,0 +1,26 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    int n,i;
+    long int seed;
+    long int a = 611953;
+    long int c = 882377;
+    long int m = 1020379;
+    long int X[100];
+    printf("Enter the number of random numbers required:\t");
+    scanf("%d",&n);
+    printf("Enter the seed value:\t");
+    scanf("%ld",&seed);
+    X[0] = seed;
+    for(i=1;i<=n;i++)
+    {
+        X[i] = (a*X[i-1] + c)% m;   //LCG
+        if(X[i]<0)
+            X[i] = X[i] * -1;
+        printf("%ld\t",X[i]);
+    }
+    printf("\n");
+    return 0;
+}

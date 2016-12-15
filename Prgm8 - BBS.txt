@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+int checkMod(long int n)
+{
+    if(n%4 == 3)
+        return 1;
+    return 0;
+}
+
+int gcd(long int m, long int n)
+{
+    if ( m==0 )
+        return n;
+    return gcd (n%m, m);
+}
+int main()
+{
+    long int p=0, q=0, n=0, s=0;
+    long int x, val[100];
+    int num, i, B[100];
+    srand(time(NULL));
+    while(p==0)
+    {
+        x = rand()%10000;
+        if(checkMod(x) == 1)
+            p = x;
+    }
+    while(q==0)
+    {
+        x = rand() % 10000;
+        if(checkMod(x) == 1)
+            q = x;
+    }
+    n = p * q;
+    while(s==0)
+    {
+        x = rand()%10000;
+        if(x!=n && gcd(x, n)==1)
+            s = x;
+    }
+    printf("Enter the number of bits needed(<100):\t");
+    scanf("%d",&num);
+    val[0] = (s*s)%n;
+    for(i=1;i<num;i++)
+    {
+        val[i] = ((val[i-1])*(val[i-1]))%n;
+        B[i] = val[i] % 2;
+        if(B[i]==-1)
+            B[i]=1;
+        printf("%d  ",B[i]);
+    }
+    printf("\n");
+    return 0;
+}

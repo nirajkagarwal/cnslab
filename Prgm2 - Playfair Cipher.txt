@@ -1,0 +1,231 @@
+//Author: Niraj Agarwal
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+char key[50];
+char plain[50];
+char modIP[50];
+char enc[50];
+char dec[50];
+char mat[5][5];
+void create_mat()
+{
+    int i,j,k=0;
+    int distinct[26];
+    for(i=0;i<26;i++)
+        distinct[i] = 0;
+    j=0,k=0;
+    for(i=0;i<strlen(key);i++)
+    {
+        if(distinct[key[i]-'a']!=1)
+        {
+            if(j==5)
+                k++,j=0;
+            mat[k][j]=key[i];
+            j++;
+            if(key[i]=='i'||key[i]=='j')
+            {
+                distinct['i'-'a'] = 1;
+                distinct['j'-'a'] = 1;
+            }
+            else
+                distinct[key[i]-'a'] = 1;
+        }
+    }
+    for(;j<5;j++)
+    {
+        for(i=0;i<26;i++)
+        {
+            if(distinct[i]==0)
+                break;
+        }
+        mat[k][j] = (char)('a'+ i);
+        if(i==8)
+            distinct[i+1]=1;
+        distinct[i] = 1;
+    }
+    k++;
+    for(;k<5;k++)
+    {
+        for(j=0;j<5;j++)
+        {
+            for(i=0;i<26;i++)
+            {
+                if(distinct[i]==0)
+                    break;
+            }
+            mat[k][j] = (char)('a'+ i);
+            if(i==8)
+                distinct[i+1]=1;
+            distinct[i] = 1;
+        }
+    }
+    printf("\n\t\tThe Generated Cipher Matrix is :\n");
+    for(i=0;i<5;i++)
+    {
+        for(j=0;j<5;j++)
+            printf("%c  ",mat[i][j]);
+        printf("\n");
+    }
+    printf("\t\tCIPHER MATRIX PRINTED ABOVE\n");
+}
+void modify_input()
+{
+    int i,k;
+    char intIP[50];
+    int len = strlen(plain);
+    k=0;
+    for(i=0;i<len;i++)
+    {
+        if((plain[i]>=65 && plain[i]<=90)||(plain[i]>=97 && plain[i]<=122))
+            intIP[k++] = plain[i];
+    }
+    intIP[k] = '\0';
+    len = k;
+    k=0;
+    for(i=0;i<len;i++)
+    {
+        if(intIP[i]==intIP[i+1])
+        {
+            modIP[k++]=intIP[i];
+            modIP[k++]='x';
+        }
+        else
+        {
+            modIP[k++] = intIP[i++];
+            modIP[k++] = intIP[i];
+        }
+    }
+    printf("\n%d\n",k);
+    modIP[k]='\0';
+    if(strlen(modIP)%2!=0)
+    {
+        k = strlen(modIP);
+        modIP[k] = 'x';
+        modIP[k+1] = '\0';
+    }
+    printf("\nModified Input %d: \t%s\n", strlen(modIP),modIP);
+}
+void encrypt()
+{
+    int i,j,k=0, c1i, c1j, c2i, c2j,temp,m=0;
+    char c1,c2;
+    modify_input();
+    //Input to be used here is now modIP
+    for(i=0;i<strlen(modIP);i+=2)
+    {
+        c1 = modIP[i];
+        c2 = modIP[i+1];
+        if(c1=='j') c1='i';
+        if(c2=='j') c1='i';
+        c1i = c1j = c2i = c2j = -1;
+        for(j=0;j<5;j++)
+        {
+            for(k=0;k<5;k++)
+            {
+                if(c1i==-1 && c1j==-1 && c1==mat[j][k])
+                    c1i = j, c1j = k;
+                else if(c2i==-1 && c2j==-1 && c2==mat[j][k])
+                    c2i = j, c2j = k;
+                else if(c1i!=-1 && c1j!=-1 && c2i!=-1 && c2!=-1)
+                    break;
+            }
+        }
+        if(c1i==c2i)
+        {
+            c2j = (c2i+1)%5;
+            c1j = (c1j+1)%5;
+        }
+        else if(c1j==c2j)
+        {
+            c1i = (c1i+1)%5;
+            c2i = (c2i+1)%5;
+        }
+        else
+        {
+            temp = c1j;
+            c1j = c2j;
+            c2j = temp;
+        }
+        enc[m++] = mat[c1i][c1j];
+        enc[m++] = mat[c2i][c2j];
+    }
+    enc[m] = '\0';
+    printf("\n\t\tEncrypted Text:\n\t\t%s\n",enc);
+}
+void decrypt()
+{
+    int i,j,k=0, c1i, c1j, c2i, c2j,temp,m=0;
+    char c1,c2;
+    //Input to be used here is now modIP
+    for(i=0;i<strlen(enc);i+=2)
+    {
+        c1 = enc[i];
+        c2 = enc[i+1];
+        if(c1=='j') c1='i';
+        if(c2=='j') c1='i';
+        c1i = c1j = c2i = c2j = -1;
+        for(j=0;j<5;j++)
+        {
+            for(k=0;k<5;k++)
+            {
+                if(c1i==-1 && c1j==-1 && c1==mat[j][k])
+                    c1i = j, c1j = k;
+                else if(c2i==-1 && c2j==-1 && c2==mat[j][k])
+                    c2i = j, c2j = k;
+                else if(c1i!=-1 && c1j!=-1 && c2i!=-1 && c2!=-1)
+                    break;
+            }
+        }
+        if(c1i==c2i)
+        {
+            c2j = (c2i-1);
+            if(c2j<0)
+                c2j = c2j +5;
+            c1j = (c1j-1);
+            if(c1j<0)
+                c1j = c1j +5;
+        }
+        else if(c1j==c2j)
+        {
+            c1i = (c1i-1);
+            if(c1i<0)
+                c1i = c1i +5;
+            c2i = (c2i-1);
+            if(c2i<0)
+                c2i = c2i +5;
+        }
+        else
+        {
+            temp = c1j;
+            c1j = c2j;
+            c2j = temp;
+        }
+        dec[m++] = mat[c1i][c1j];
+        dec[m++] = mat[c2i][c2j];
+    }
+    dec[m] = '\0';
+    printf("\n\t\tDecrypted Text:\n\t\t%s\n",dec);
+    printf("\nRemoving the bogus character(x):\n");
+    k=0;
+    for(i=0;i<strlen(dec);i++)
+    {
+        if(dec[i]!='x')
+            plain[k++] = dec[i];
+    }
+    plain[k]='\0';
+    printf("\t\t%s\n",plain);
+}
+int main()
+{
+    printf("Enter the key:\n");
+    gets(key);
+    getchar();
+    create_mat();
+    printf("Enter the PlainText:\t");
+    gets(plain);
+    encrypt();
+    decrypt();
+    return 0;
+}
